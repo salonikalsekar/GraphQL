@@ -1,12 +1,15 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const graphqlhttp = require('express-graphql');
+const mongoose = require('mongoose');
+
 const {
     buildSchema
 } = require('graphql');
 
 const app = express()
 
+const events = [];
 
 app.get('/', (req, res, next) => {
     res.send("hello")
@@ -16,11 +19,26 @@ app.get('/', (req, res, next) => {
 //! - required
 app.use('/graphql', graphqlhttp({
     schema: buildSchema(`
+
+    type Event{
+        _id: ID!
+        title: String!
+        description: String!
+        price: Float!
+        date: String!
+    }
+
     type RootQuery{
-        events: [String!]!
+        events: [Event!]!
+    }
+    input EventInput{
+        title: String!
+        description: String!
+        price: Float!
+        date: String!
     }
     type RootMutation{
-        createEvent(name: String): String
+        createEvent(eventInp : EventInput): Event
 
     }
         schema{
@@ -30,14 +48,28 @@ app.use('/graphql', graphqlhttp({
     `),
     rootValue: {
         events: () =>{
-            return ['abc, xyz, klm, bcd']
+            return events
         },
         createEvent: (args) =>{
-            const eventName = args.name;
-            return eventName
+            const event ={
+                _id :  Math.random().toString(),
+                title: args.eventInp.title,
+                description: args.eventInp.description,
+                price: +args.eventInp.price,
+                date: new Date().toISOString()
+            }
+            events.push(event)
+            return event
+
         }
     },
     graphiql : true
 }))
+// const client = new MongoClient(`mongodb+srv://sal-14:${process.env.MONGO_PASSWORD}@cluster0-wgbmh.mongodb.net/test?retryWrites=true&w=majority`, { useNewUrlParser: true });
+mongoose.connect(`mongodb+srv://saloni:Hari@cluster0-wgbmh.mongodb.net/test?retryWrites=true&w=majority`).then(() =>{
+    app.listen(3000)
+})
+.catch(err =>{
+    console.log(err)
+})
 
-app.listen(3000)
