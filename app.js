@@ -2,14 +2,12 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const graphqlhttp = require('express-graphql');
 const mongoose = require('mongoose');
-
+const eventModel = require('./models/event');
 const {
     buildSchema
 } = require('graphql');
 
 const app = express()
-
-const events = [];
 
 app.get('/', (req, res, next) => {
     res.send("hello")
@@ -48,25 +46,41 @@ app.use('/graphql', graphqlhttp({
     `),
     rootValue: {
         events: () =>{
-            return events
+            return eventModel.find().then(events => {
+                return events.map(event => {
+                    return { ...event._doc, _id: event.id } 
+                })
+            }).catch(err => {
+                throw err;
+            })
         },
         createEvent: (args) =>{
-            const event ={
-                _id :  Math.random().toString(),
+            // const event ={
+            //     _id :  Math.random().toString(),
+            //     title: args.eventInp.title,
+            //     description: args.eventInp.description,
+            //     price: +args.eventInp.price,
+            //     date: new Date().toISOString()
+            // }
+            // events.push(event)
+
+            const event = new eventModel({
                 title: args.eventInp.title,
-                description: args.eventInp.description,
-                price: +args.eventInp.price,
-                date: new Date().toISOString()
-            }
-            events.push(event)
-            return event
+                    description: args.eventInp.description,
+                    price: +args.eventInp.price,
+                    date: new Date().toISOString()
+            })
+            return event.save().then(res =>{
+                return { ...res._doc, _id: res._doc._id.toString() } 
+            }).catch(err => {
+                throw err;
+            })
 
         }
     },
     graphiql : true
 }))
-// const client = new MongoClient(`mongodb+srv://sal-14:${process.env.MONGO_PASSWORD}@cluster0-wgbmh.mongodb.net/test?retryWrites=true&w=majority`, { useNewUrlParser: true });
-mongoose.connect(`mongodb+srv://saloni:Hari@cluster0-wgbmh.mongodb.net/test?retryWrites=true&w=majority`).then(() =>{
+mongoose.connect(`mongodb+srv://user:password@cluster0-wgbmh.mongodb.net/react-graphql-dev?retryWrites=true&w=majority`).then(() =>{
     app.listen(3000)
 })
 .catch(err =>{
