@@ -4,9 +4,11 @@ const graphqlhttp = require('express-graphql');
 const mongoose = require('mongoose');
 const graphqlSchema = require('./graphql/schema/index')
 const graphqlResolver = require('./graphql/resolvers/index')
-
+const isAuth = require('./middleware/is-auth');
 const app = express()
 
+
+app.use(isAuth)
 //String-  will return a string and never a null
 //! - required
 app.use('/graphql', graphqlhttp({
