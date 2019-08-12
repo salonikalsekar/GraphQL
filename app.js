@@ -7,7 +7,7 @@ const graphqlResolver = require('./graphql/resolvers/index')
 const isAuth = require('./middleware/is-auth');
 const app = express()
 
-
+app.use(bodyParser.json());
 app.use((req, res, next) => {
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Methods', 'POST,GET,OPTIONS');
@@ -19,8 +19,7 @@ app.use((req, res, next) => {
   });
   
 app.use(isAuth)
-//String-  will return a string and never a null
-//! - required
+
 app.use('/graphql', graphqlhttp({
     schema:graphqlSchema,
     rootValue:graphqlResolver ,

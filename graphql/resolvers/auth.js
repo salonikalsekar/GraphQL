@@ -6,7 +6,9 @@ const bcryptjs = require('bcryptjs');
 
 module.exports= {
   createUser: async args => {
+    console.log("d")
     try {
+      console.log("user")
       const existingUser = await userModel.findOne({ email: args.userInp.email });
       if (existingUser) {
         throw new Error('User exists already.');
