@@ -1,4 +1,4 @@
-GraphQL
+GraphQL  - Basic Concepts
 
 Developed by Facebook and made in open source in 2015.
 
